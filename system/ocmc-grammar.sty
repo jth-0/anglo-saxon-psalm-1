@@ -1,0 +1,279 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{ocmc-grammar}[2016/07/20 OCMC Grammatical Analysis Package]
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage[osf]{libertine} % Use the Libertine font
+\usepackage{expex} % for interlinear text, e.g. glossed text
+\usepackage{tikz-dependency} % for dependency trees
+\usepackage{pythontex}
+\usepackage{xpatch}
+\usepackage{xparse}
+\usepackage{qtree}% alternative to tikz-depenency
+
+\usepackage{drs}% alternative for dependency diagram
+
+\usepackage{mdframed}% alternative for dependency diagram
+\makeatletter
+\xpatchcmd{\mdf@preenvsetting}
+  {\mdf@envdepth >\tw@}
+  {\mdf@envdepth >20}
+  {}
+  {}
+\makeatother
+\usepackage{parallel}
+\usepackage{microtype} % Improves character and word spacing
+
+\usepackage{pifont}
+
+\usepackage[top=3cm,bottom=3cm,left=3cm,right=3cm,headsep=10pt,a4paper]{geometry} % Page margins
+
+%----------------------------------------------------------------------------------------
+% Commands to format Interlinear
+%----------------------------------------------------------------------------------------
+\newcommand{\ltSource}[1]{Source: #1}
+
+\newcommand\ogActor[1]{{ \faMale } #1}
+\newcommand\ogRef[1]{{ \ding{223}} #1}
+
+%---------------------------------------
+% Commands for Nested Boxes Dependency Tree
+%--------------------------------------
+\mdfsetup{skipabove=5pt,skipbelow=5pt}
+
+\mdfdefinestyle{dependency}{leftmargin=0.5cm,rightmargin=0.5cm,%
+innerleftmargin=0.5cm,innerrightmargin=0.5cm,roundcorner=10pt}
+
+\newcommand{\grNode}[6]{%
+        \textbf{\color{blue}#1 \color{burgundy}#2 \color{blue}#3 \color{burgundy}#4 \color{black}#5 \color{blue}#6} \color{black}%    
+}%
+
+\mdfdefinestyle{mdfexample1}{leftmargin=0.5cm,rightmargin=0.5cm,%
+innerleftmargin=0.5cm,innerrightmargin=0.5cm,roundcorner=10pt}
+
+%----------------------------------------------------------------------------------------
+% Commands to format Dependency Trees
+%----------------------------------------------------------------------------------------
+\newcommand{\grk}[1]{\color{blue}\textbf{#1}\color{black}}
+\newcommand{\eng}[1]{\color{burgundy}\textbf{#1}\color{black}}
+\newcommand{\opt}[1]{{[}#1{]}} % optional element
+\newcommand{\ver}[1]{\begin{center}\textbf{#1}\end{center}}
+% comment out two of the following four to control the defs
+%\newcommand*{\GrkOnly}{}
+%\newcommand*{\EngOnly}{}
+\newcommand*{\GrkEng}{}
+%\newcommand*{\GrkEngNbr}{}
+
+\ifdefined\GrkOnly
+	% root node
+	\def\macrnode(#1,#2,#3,#4,#5){\node (is-root) {\grk{#2} \\ #3}} 
+	% shifted node (to left or to right)
+	\def\macnode(#1,#2,#3,#4,#5){node { \grk{#2} \\ #3 }} 
+	\def\macsnode(#1,#2,#3,#4,#5,#6,#7){node [#6=#7cm] { \grk{#2} \\ #3 }} 
+	% unordered node
+	\def\macunode(#1,#2,#3){node { \grk{#1} \\ #2}} 
+	% root, unordered node
+	\def\macrunode(#1,#2,#3){\node (is-root) { \grk{#1} \\ #2}} 
+	% shifted unordered node
+	\def\macsunode(#1,#2,#3,#4,#5){node [#4=#5cm] { \grk{#1} \\ #2}} 
+\fi
+
+\ifdefined\EngOnly
+	% root node
+	\def\macrnode(#1,#2,#3,#4,#5){\node (is-root) {\eng{#5} \\ #3}} 
+	% shifted node (to left or to right)
+	\def\macnode(#1,#2,#3,#4,#5){node { \eng{#5} \\ #3 }} 
+	\def\macsnode(#1,#2,#3,#4,#5,#6,#7){node [#6=#7cm] { \eng{#5} \\ #3 }} 
+	% unordered node
+	\def\macunode(#1,#2,#3){node { \eng{#3} \\ #2}} 
+	% root, unordered node
+	\def\macrunode(#1,#2,#3){\node (is-root) { \eng{#3} \\ #2}} 
+	% shifted unordered node
+	\def\macsunode(#1,#2,#3,#4,#5){node [#4=#5cm] { \eng{#3} \\ #2}} 
+\fi
+
+\ifdefined\GrkEng
+	% root node
+	\def\macrnode(#1,#2,#3,#4,#5){\node (is-root) {\grk{#2} \\ #3 \\\eng{#5}}} 
+	% regular node
+	\def\macnode(#1,#2,#3,#4,#5){node {\grk{#2} \\ #3 \\ \eng{#5}}} 
+	% shifted node (to left or to right)
+	\def\macsnode(#1,#2,#3,#4,#5,#6,#7){node [#6=#7cm] {\grk{#2} \\ #3 \\\eng{#5}}} 
+	% unordered node
+	\def\macunode(#1,#2,#3){node { \grk{#1} \\ #2 \\ \eng{#3}}} 
+	% root, unordered node
+	\def\macrunode(#1,#2,#3){\node (is-root) { \grk{#1} \\ #2 \\ \eng{#3}}} 
+	% shifted unordered node
+	\def\macsunode(#1,#2,#3,#4,#5){node [#4=#5cm] { \grk{#1} \\ #2 \\ \eng{#3}}} 
+\fi
+
+\ifdefined\GrkEngNbr
+	%root node
+	\def\macrnode(#1,#2,#3,#4,#5){\node (is-root) { (#1) \grk{#2} \\ #3 \\ (#4) \eng{#5}}} 
+	% regular node
+	\def\macnode(#1,#2,#3,#4,#5){node { (#1) \grk{#2} \\ #3 \\ (#4) \eng{#5}}} 
+	% shifted node (to left or to right)
+	\def\macsnode(#1,#2,#3,#4,#5,#6,#7){node [#6=#7cm] { (#1) \grk{#2} \\ #3 \\ (#4) \eng{#5}}} 
+	% unordered node
+	\def\macunode(#1,#2,#3){node { \grk{#1} \\ #2 \\ \eng{#3}}} 
+	% root, unordered node
+	\def\macrunode(#1,#2,#3){\node (is-root) { \grk{#1} \\ #2 \\ \eng{#3}}} 
+	% shifted unordered node
+	\def\macsunode(#1,#2,#3,#4,#5){node [#4=#5cm] { \grk{#1} \\ #2 \\ \eng{#3}}} 
+\fi
+
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+\def\to(#1,#2){#1\textrightarrow #2}
+\def\from(#1,#2){#1\textleftarrow #2}
+\newcommand{\macref}[1]{(\getref{#1})}
+\newcommand{\macfullref}[1]{(\getfullref{#1})}
+\definelingstyle{ocmc}{glstyle=nlevel,extraglskip=1em}
+
+\usepackage[object=vectorian]{pgfornament}
+
+\newcommand{\noteLexical}[2]{%
+\ding{68} \ \textbf{#1} \textbullet \ #2%
+}%
+\newcommand{\noteLexicalText}[3]{%
+\ding{68} \ \textbf{#1} \textbullet \ #2 \textbullet \ #3%
+}%
+\newcommand{\noteLexicalTitleText}[4]{%
+\ding{68} \ \textbf{#1} \textbullet \ #2 \textbullet \ #3 \textbullet \ #4%
+}%
+\newcommand{\noteMeaning}[1]{%
+\textbullet \ MEANING \textbullet \ #1%
+}%
+
+\newcommand{\noteGrammar}[1]{%
+\textbullet \ GRAMMAR \textbullet \ #1%
+}%
+
+\newcommand{\noteAdviceTrans}[1]{%
+\textbullet \ ADVICE FOR TRANSLATOR \textbullet \ #1%
+}%
+
+\newcommand{\noteAdviceTester}[1]{%
+\textbullet \ ADVICE FOR TESTER \textbullet \ #1%
+}%
+\newcommand{\noteCulture}[1]{%
+\textbullet \ CULTURE \ding{223} #1%
+}%
+\newcommand{\noteGeneral}[1]{%
+\textbullet \ GENERAL \ding{223} #1%
+}%
+\newcommand{\noteGeography}[1]{%
+\textbullet \ GEOGRAPHY \ding{223} #1%
+}%
+\newcommand{\noteHistory}[1]{%
+\textbullet \ HISTORY \ding{223} #1%
+}%
+\newcommand{\noteLiturgicalUsage}[1]{%
+\textbullet \ LITURGICAL USAGE \ding{223} #1%
+}%
+\newcommand{\noteRefToGroup}[2]{%
+\textbullet \ REFERS TO GROUP \ding{223} #1  \textbullet \ #2%
+}%
+
+\newcommand{\noteRefToAnimal}[2]{%
+\textbullet \ REFERS TO ANIMAL \ding{223} #1  \textbullet \ #2%
+}%
+
+\newcommand{\noteRefToBeing}[2]{%
+\textbullet \ REFERS TO BEING \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToConcept}[2]{%
+\textbullet \ REFERS TO CONCEPT \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToEvent}[2]{%
+\textbullet \ REFERS TO EVENT \ding{223} #1  \textbullet \ #2%
+}%
+
+\newcommand{\noteRefToGod}[2]{%
+\textbullet \ REFERS TO GOD \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToHuman}[2]{%
+\textbullet \ REFERS TO HUMAN \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToMystery}[2]{%
+\textbullet \ REFERS TO MYSTERY \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToObject}[2]{%
+\textbullet \ REFERS TO OBJECT \ding{223} #1 #2%
+}%
+\newcommand{\noteRefToPlace}[2]{%
+\textbullet \ REFERS TO PLACE \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToPlant}[2]{%
+\textbullet \ REFERS TO PLANT \ding{223} #1  \textbullet \ #2%
+}%
+\newcommand{\noteRefToRole}[2]{%
+\textbullet \ REFERS TO ROLE \ding{223} #1  \textbullet \ #2%
+}%
+\DeclareDocumentCommand\noteRefToBible{m m g g }{%
+  \IfValueTF{#4}{%
+      \textbullet \ REFERS TO BIBLICAL TEXT \ding{223} #1  \textbullet \ #2 \textbullet \ #3: #4 \ %
+  }{%
+    \IfValueTF{#3}{%
+      \textbullet \ REFERS TO BIBLICAL TEXT \ding{223} #1  \textbullet \ #2: #3 \ %
+    }{%
+      \textbullet \ REFERS TO BIBLICAL TEXT \ding{223} #1  \textbullet \ #2 \ %
+    }%
+  }%
+}%
+\DeclareDocumentCommand\noteCheckYourBible{m m g g }{%
+  \IfValueTF{#4}{%
+      \textbullet \ CHECK YOUR BIBLE \ding{223} #1  \textbullet \ #2 \textbullet \ #3: #4 \ %
+  }{%
+    \IfValueTF{#3}{%
+      \textbullet \ CHECK YOUR BIBLE \ding{223} #1  \textbullet \ #2: #3 \ %
+    }{%
+      \textbullet \ CHECK YOUR BIBLE \ding{223} #1  \textbullet \ #2 \ %
+    }%
+  }%
+}%
+\DeclareDocumentCommand\noteGeneric{m m g }{%
+    \IfValueTF{#3}{%
+      \textbullet \ #1 \textbullet #2: #3 \ %
+    }{%
+      \textbullet \ #1: #2 \ %
+    }%
+}%
+
+\DeclareDocumentCommand\noteRefersTo{m m g}{%
+    \IfValueTF{#3}{%
+      \textbullet \ #1 \ding{223} #2: #3 \ %
+    }{%
+      \textbullet \ #1 \ding{223} #2 \ %
+    }%
+}%
+
+\newcommand{\noteLexicalRefToBible}[5]{%
+\ding{68} \ \textbf{#1} \textbullet \ #2 \ding{223} #3 #4 \textbullet \ #5%
+}%
+
+\newcommand{\noteLexicalRefToBibleTitle}[6]{%
+\ding{68} \ \textbf{#1} \textbullet \ #2 \  \ding{223} #3 #4 \textbullet \ #5  \textbullet \ #6%
+}%
+
+\newcommand{\noteTranslatorsNote}[2]{%
+\textbullet \ TRANSLATOR'S NOTE \ding{223} #1 #2%
+}%
+\newcommand{\noteUnit}[1]{%
+\textbullet \ UNIT \ding{223} #1%
+}%
+\newcommand{\noteVocabulary}[2]{%
+\textbullet \ VOCABULARY \ding{223} #2%
+}%
+\newcommand{\sectionline}{%
+  \noindent
+  \begin{center}
+    {\color{red}
+    \resizebox{0.5\linewidth}{1ex}
+    {{%
+    {\begin{tikzpicture}
+    \node  (C) at (0,0) {};
+    \node (D) at (9,0) {};
+    \path (C) to [ornament=85] (D);
+    \end{tikzpicture}}}}}%
+    \end{center}%
+}%
+
+\endinput
